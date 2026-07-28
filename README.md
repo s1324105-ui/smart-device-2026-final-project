@@ -1,0 +1,1 @@
+# smart-device-2026-final-project
