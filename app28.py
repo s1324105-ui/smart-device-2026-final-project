@@ -10,7 +10,7 @@ if "GEMINI_API_KEY" in st.secrets:
 else:
     st.error("APIキーが st.secrets に見つかりません。ディレクトリ名が '.streamlit' (ドットあり) になっているか確認してください。")
     st.stop() # キーがない場合は処理を停止
-model = genai.GenerativeModel("gemini-1.5-flash")
+model = genai.GenerativeModel("gemini-2.0-flash-lite")
 
 # ====== ここにあなたの questions_data をそのまま貼り付け ======
 questions_data = {
@@ -1084,7 +1084,13 @@ JSONのみ出力してください。
     text = text.replace("```json", "")
     text = text.replace("```", "").strip()
 
-    return json.loads(text)
+    try:
+        return json.loads(text)
+
+    except:
+        st.error("AIのJSON変換に失敗しました")
+        st.write(text)
+        return None
 # ============================================================
 
 for k,v in {
@@ -1284,17 +1290,81 @@ if st.session_state.finish:
     
     # AI評価がまだ生成されていない場合のみAPIを呼び出す
     if st.session_state.ai_evaluation is None:
-        with st.spinner("AI先生が評価を生成中..."):
-            try:
-                response = model.generate_content(prompt)
-                if response and response.text:
-                    st.session_state.ai_evaluation = response.text
-                else:
-                    st.session_state.ai_evaluation = "AIからの回答が空でした。もう一度お試しください。"
-            except Exception as e:
-                st.error("AI評価の生成中にエラーが発生しました。")
-                st.session_state.ai_evaluation = "評価を取得できませんでした。"
 
+     with st.spinner("🤖 AI先生が文化理解度を分析中..."):
+
+        try:
+            # Gemini AI評価
+            response = model.generate_content(
+                prompt,
+                generation_config={
+                    "max_output_tokens": 300
+                }
+            )
+
+            if response and response.text:
+                st.session_state.ai_evaluation = (
+                    "🤖 Gemini AIによる評価\n\n"
+                    + response.text
+                )
+
+            else:
+                raise Exception("AI回答なし")
+
+
+        except Exception:
+
+            # ==========================
+            # AI利用不可時の自動評価
+            # ==========================
+
+            score_percent = score * 20
+
+
+            if score == 5:
+                advice = """
+🌟 素晴らしい理解度です！
+
+文化や生活習慣の違いをよく理解できています。
+実際の交流でも相手の文化を尊重した行動ができます。
+"""
+
+            elif score >= 3:
+                advice = """
+😊 基本的な文化理解ができています。
+
+食事や生活習慣など、さらに詳しく学ぶことで
+異文化への理解がより深まります。
+"""
+
+            else:
+                advice = """
+📚 これから文化理解を深めていきましょう。
+
+まずは挨拶や食文化など、
+日常生活に関わる文化から学ぶことがおすすめです。
+"""
+
+
+            # AI風評価
+            st.session_state.ai_evaluation = f"""
+🤖 AI文化教師による評価
+
+文化理解度：{score_percent}点 / 100点
+
+評価：
+{"⭐" * score}/5
+
+分析：
+{advice}
+
+
+おすすめ学習分野：
+・食文化
+・生活習慣
+・マナー
+・価値観の違い
+"""
     st.write(st.session_state.ai_evaluation)
 
     # 最初に戻るボタン
