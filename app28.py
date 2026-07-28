@@ -1117,16 +1117,16 @@ if "country" not in st.session_state:
     st.session_state.country = None
 
 countries = [
-    ("アメリカ", "flags/usa.png"),
-    ("韓国", "flags/korea.png"),
-    ("フランス", "flags/france.png"),
-    ("イギリス", "flags/uk.png"),
-    ("インド", "flags/india.png"),
-    ("中国", "flags/china.png"),
-    ("ブラジル", "flags/brazil.png"),
-    ("スペイン", "flags/spain.png"),
-    ("ドイツ", "flags/germany.png"),
-    ("スウェーデン", "flags/sweden.png")
+    ("アメリカ", "usa.png"),
+    ("韓国", "korea.png"),
+    ("フランス", "france.png"),
+    ("イギリス", "uk.png"),
+    ("インド", "india.png"),
+    ("中国", "china.png"),
+    ("ブラジル", "brazil.png"),
+    ("スペイン", "spain.png"),
+    ("ドイツ", "germany.png"),
+    ("スウェーデン", "sweden.png")
 ]
 
 cols = st.columns(3)
